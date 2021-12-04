@@ -1,9 +1,10 @@
 # spark-pull-from-kafka
 Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Email Service.
 ---
-Name: Karan Malhotra
-Name: Shahrukh Haider
-Name: Shashwath Jawaharlal Sathyanarayan
+## Group Members
+1. Karan Malhotra
+2. Shahrukh Haider
+3. Shashwath Jawaharlal Sathyanarayan
 ---
 
 ### Installations
@@ -21,19 +22,19 @@ Name: Shashwath Jawaharlal Sathyanarayan
 + Kafka Version: 
 + AWS Simple Email Service
 
-## Project Overview:
+## Project Overview
 - Same in all repos.
 
-## Setting up Kafka:
+## Setting up Kafka
 - Write here
 
-## Setting up Apache Spark:
+## Setting up Apache Spark
 - Write here
 
-### Steps to Run the Spark-Pull-From-Kafka Application Manually:
+### Steps to Run the Spark-Pull-From-Kafka Application Manually
 - Write here
 
-### Steps to Deploy on Amazon Web Services:
+### Steps to Deploy on Amazon Web Services
 - Write here
 
 ## Test Cases
