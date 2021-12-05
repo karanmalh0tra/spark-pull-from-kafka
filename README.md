@@ -23,7 +23,9 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 + AWS Simple Email Service
 
 ## Project Overview
-- Same in all repos.
++ In this project a streaming data pipeline was created by designing and implementing an actor-model service using Akka.
++ This model  ingests logfile generated data in real time and delivers it via an event-based service called Kafka to Spark for further processing. 
++ An aggregation of the total number of ERROR and WARN messages was computed and the stakeholders were notified via email.
 
 ## Setting up Kafka
 1. To set up kafka in the cloud we will be making use of Amazon's Managed Streaming for Apache Kafka. Amazon MSK is a fully managed service that enables one to build and run applications that use Apache Kafka to process streaming data which in our case are the log messages being passed from the Akka actor system. The following steps are to be followed to set up kafka :-
@@ -70,9 +72,6 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 
 ## Test Cases
 1. Tests if URL is https or not.
-
-## Overview
-Write here.<br/>
 
 ## Output
 
