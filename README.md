@@ -36,7 +36,7 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 - Get Cluster ARN: `aws kafka describe-cluster --cluster-arn "ClusterArn" --region region`
 - Create Topic: `bin/kafka-topics.sh --create --zookeeper "ZookeeperConnectString" --replication-factor 2 --partitions 1 --topic topic`
 2. Now we have to produce and consume data from the above crested kafka stream:
-- Get the name of the Java JVM from the java runtime and use the Java trust store command which is a copy command to fetch the trust door from Java: `cp/usr/lib/jvm/"Java JVM name"/jre/lib/security/cacerts /tmp/kafka.client.truststore.jks`
+- Get the name of the Java JVM from the java runtime and use the Java trust store command which is a copy command to fetch the trust door from Java: `cp /usr/lib/jvm/"Java JVM name"/jre/lib/security/cacerts /tmp/kafka.client.truststore.jks`
 3. Switch directories to kafka's bin folder and create a client properties file that contains a security protocol on the trust store location.
 - client.properties: `security.protocol=SSL ssl.truststore.location=/tmp/kafka.client.truststore.jks`
 4. To start creating messages we need to get the bootstrap broker string TSL 
@@ -53,13 +53,20 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 	`"org.apache.spark"%%"spark-streaming-kafka-0-10"%"3.0.3"`
 2. The first thing a Spark program must do is to create a SparkContext object, which tells Spark how to access a cluster. To create a SparkContext one needs to build a SparkConf object that contains information about the application
 3. Then a Kafka consumer to fetch error and warn log messages via the spark streams was implemented 
-4. Finally every line received from the kafka stream was iterated over and an email was sent for the same
+4. Finally every line received from the kafka stream was iterated over and an email was sent for the same.
 
-### Steps to Run the Spark-Pull-From-Kafka Application Manually
-- Write here
-
-### Steps to Deploy on Amazon Web Services
-- Write here
+### Steps to Run the Spark-Pull-From-Kafka Application
+1. Install Scala
+ - `wget http://downloads.lightbend.com/scala/2.11.8/scala-2.11.8.rpm`
+ - `sudo yum install scala-2.11.8.rpm`
+3. Install SBT
+ - `curl -L https://www.scala-sbt.org/sbt-rpm.repo > sbt-rpm.repo`
+ - `sudo mv sbt-rpm.repo /etc/yum.repos.d/`
+ - `sudo yum install sbt`
+5. Install Git
+ - `sudo yum install git`
+7. Clone this repo
+9. Execute the Spark Program by typing `sbt "runMain KafkaSparkIntegration"` in the root directory of this project.
 
 ## Test Cases
 1. Tests if URL is https or not.
