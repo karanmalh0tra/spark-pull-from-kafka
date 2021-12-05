@@ -8,6 +8,8 @@ import org.apache.spark.streaming.kafka010._
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.ses.SesClient
 
+import HelperUtils.{CreateLogger, ObtainConfigReference}
+
 import javax.mail.{Address, Message, MessagingException, Session}
 import javax.mail.internet.AddressException
 import javax.mail.internet.InternetAddress
@@ -39,23 +41,25 @@ import java.util.UUID;
  */
 object KafkaSparkIntegration {
   def main(args: Array[String]): Unit = {
+    /* Load Configs from application.conf and Create Logger */
     val sparkConfig = ConfigFactory.load("spark")
     val awsConfig = ConfigFactory.load("aws")
-    /* AWS START */
+    val logger = CreateLogger(classOf[KafkaSparkIntegration])
+
+    /* LOAD AWS Configs */
     val FROM: String = awsConfig.getString("FROM")
     val TO: String = awsConfig.getString("TO")
     val SUBJECT: String = awsConfig.getString("SUBJECT")
     val TEXTBODY: String = awsConfig.getString("TEXTBODY")
-    /* AWS Config End */
 
-//    StreamingExamples.setStreamingLogLevels()
-
+    /* LOAD Spark Configs */
     val brokers = sparkConfig.getString("BROKERS")
     val topics = sparkConfig.getString("TOPIC")
 
     // Create context with 2 second batch interval
     val sparkConf = new SparkConf().setAppName("KafkaSparkIntegration").setMaster("local[*]")
-    val ssc = new StreamingContext(sparkConf, Seconds(10))
+    val ssc = new StreamingContext(sparkConf, Seconds(2))
+    /*Configure to display ERROR Logs */
     ssc.sparkContext.setLogLevel("ERROR")
 
     // Create direct kafka stream with brokers and topics
@@ -72,14 +76,14 @@ object KafkaSparkIntegration {
       LocationStrategies.PreferConsistent,
       ConsumerStrategies.Subscribe[String, String](topicsSet, kafkaParams))
 
-    // Get the lines, split them into words, count the words and print
+    // Fetch Each Line as Received
     val lines = messages.map(_.value)
-    lines.print()
+
+    // Loop on all the lines received in the interval and send an EMAIL for each one of them
     lines.foreachRDD(x => {
       if (x.count() > 0){
         val HTMLBODY: String = s"""<h1>WARNING/ERROR IN YOUR APPLICATION</h1
-                                 <p>This email was sent with <a href="https://aws.amazon.com/sdk-for-java/">AWS SDK for Java</a>
-                                 <p>You received a WARNING/ERROR Message</p>
+                                 <p>You received a WARNING/ERROR LOG in your application</p>
                                  <p><b>${x.collect().mkString(" ")}</b></p>"""
         val client = SesClient.builder()
           .region(Region.US_EAST_1)
@@ -95,17 +99,22 @@ object KafkaSparkIntegration {
     })
     // Start the computation
     ssc.start()
+    // Await User's termination Command
     ssc.awaitTermination()
   }
   def send(client: SesClient, sender: String, recipient: String, subject: String, bodyText: String, bodyHTML: String): Unit ={
+
+    // Create a Session and a message of MIME TYPE
     val session: Session = Session.getDefaultInstance(new Properties())
     val message: MimeMessage = new MimeMessage(session)
 
+    // Set Subject, Address, Sender and Recepient
     message.setSubject(subject,"UTF-8")
     val toAddress:Address = new InternetAddress(recipient).asInstanceOf[Address]
     message.setFrom(new InternetAddress(sender))
     message.setRecipient(Message.RecipientType.TO,toAddress)
 
+    // As an alternative to the HTML Body Message in case of failure
     val msgBody: MimeMultipart = new MimeMultipart("alternative")
 
     val wrap: MimeBodyPart = new MimeBodyPart()
@@ -128,6 +137,7 @@ object KafkaSparkIntegration {
     msg.addBodyPart(wrap)
 
     try {
+      // Attempt to send an email
       println("Attempting to send an email through Amazon SES using the AWS SDK")
       val outputStream: ByteArrayOutputStream = new ByteArrayOutputStream()
       message.writeTo(outputStream)
