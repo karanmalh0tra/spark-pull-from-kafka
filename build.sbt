@@ -27,5 +27,9 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-parser" % circeVersion,
   "org.apache.spark" %% "spark-core" % "3.0.3",
   "org.apache.spark" %% "spark-streaming" % "3.0.3",
-  "org.apache.spark" %% "spark-streaming-kafka-0-10" % "3.0.3"
+  "org.apache.spark" %% "spark-streaming-kafka-0-10" % "3.0.3",
+  "org.scalatest" %% "scalatest" % "3.2.9" % Test,
+  "org.mockito" % "mockito-core" % "4.0.0" % Test,
+  "junit" % "junit" % "4.12",
+  "com.novocode" % "junit-interface" % "0.10" % Test
 )

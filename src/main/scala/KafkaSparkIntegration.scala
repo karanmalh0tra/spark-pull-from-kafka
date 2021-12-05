@@ -39,13 +39,13 @@ import java.util.UUID;
  *    $ bin/run-example streaming.DirectKafkaWordCount broker1-host:port,broker2-host:port \
  *    consumer-group topic1,topic2
  */
+class KafkaSparkIntegration
 object KafkaSparkIntegration {
   val logger = CreateLogger(classOf[KafkaSparkIntegration])
   def main(args: Array[String]): Unit = {
     /* Load Configs from application.conf and Create Logger */
     logger.info("Fetching all the Configurations...")
     val config = ConfigFactory.load()
-    val logger = CreateLogger(classOf[KafkaSparkIntegration])
 
     /* LOAD AWS Configs */
     val FROM: String = config.getString("aws.FROM")
