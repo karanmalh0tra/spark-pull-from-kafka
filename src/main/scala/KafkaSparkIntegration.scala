@@ -1,11 +1,12 @@
+import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka010._
-
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.ses.SesClient
+
 import javax.mail.{Address, Message, MessagingException, Session}
 import javax.mail.internet.AddressException
 import javax.mail.internet.InternetAddress
@@ -20,6 +21,7 @@ import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest
 import software.amazon.awssdk.services.ses.model.RawMessage
 import software.amazon.awssdk.services.ses.model.SesException
+import java.util.UUID;
 
 
 /**
@@ -35,26 +37,17 @@ import software.amazon.awssdk.services.ses.model.SesException
  */
 object KafkaSparkIntegration {
   def main(args: Array[String]): Unit = {
-    if (args.length < 3) {
-      System.err.println(s"""
-                            |Usage: KafkaSparkIntegration <brokers> <groupId> <topics>
-                            |  <brokers> is a list of one or more Kafka brokers
-                            |  <groupId> is a consumer group name to consume from topics
-                            |  <topics> is a list of one or more kafka topics to consume from
-                            |
-        """.stripMargin)
-      System.exit(1)
-    }
     /* AWS START */
     val FROM: String = "kmalho4@uic.edu"
-    val TO: String = "m9.karan@gmail.com"
+    val TO: String = "m9.karan@gmail.com,shaide32@uic.edu,sjawah2@uic.edu"
     val SUBJECT: String = "Amazon SES Warning/Error Log in Your Application"
     val TEXTBODY: String = "This email was sent through Amazon SES using the AWS SDK for Scala"
     /* AWS Config End */
 
 //    StreamingExamples.setStreamingLogLevels()
 
-    val Array(brokers, groupId, topics) = args
+    val brokers = "b-2.kafka-cluster-karan.nxte3l.c20.kafka.us-east-1.amazonaws.com:9094,b-1.kafka-cluster-karan.nxte3l.c20.kafka.us-east-1.amazonaws.com:9094"
+    val topics = "logtopic"
 
     // Create context with 2 second batch interval
     val sparkConf = new SparkConf().setAppName("KafkaSparkIntegration").setMaster("local[*]")
@@ -65,9 +58,11 @@ object KafkaSparkIntegration {
     val topicsSet = topics.split(",").toSet
     val kafkaParams = Map[String, Object](
       ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG -> brokers,
-      ConsumerConfig.GROUP_ID_CONFIG -> groupId,
+      ConsumerConfig.GROUP_ID_CONFIG -> UUID.randomUUID().toString,
       ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer],
-      ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer])
+      ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer],
+      CommonClientConfigs.SECURITY_PROTOCOL_CONFIG -> "SSL",
+      "ssl.truststore.location" -> "/tmp/kafka.client.truststore.jks")
     val messages = KafkaUtils.createDirectStream[String, String](
       ssc,
       LocationStrategies.PreferConsistent,
@@ -151,6 +146,5 @@ object KafkaSparkIntegration {
         System.exit(1)
       }
     }
-
   }
 }
