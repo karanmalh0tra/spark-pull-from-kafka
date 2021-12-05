@@ -1,3 +1,4 @@
+import com.typesafe.config.ConfigFactory
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -21,6 +22,7 @@ import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest
 import software.amazon.awssdk.services.ses.model.RawMessage
 import software.amazon.awssdk.services.ses.model.SesException
+
 import java.util.UUID;
 
 
@@ -37,21 +39,23 @@ import java.util.UUID;
  */
 object KafkaSparkIntegration {
   def main(args: Array[String]): Unit = {
+    val sparkConfig = ConfigFactory.load("spark")
+    val awsConfig = ConfigFactory.load("aws")
     /* AWS START */
-    val FROM: String = "kmalho4@uic.edu"
-    val TO: String = "m9.karan@gmail.com,shaide32@uic.edu,sjawah2@uic.edu"
-    val SUBJECT: String = "Amazon SES Warning/Error Log in Your Application"
-    val TEXTBODY: String = "This email was sent through Amazon SES using the AWS SDK for Scala"
+    val FROM: String = awsConfig.getString("FROM")
+    val TO: String = awsConfig.getString("TO")
+    val SUBJECT: String = awsConfig.getString("SUBJECT")
+    val TEXTBODY: String = awsConfig.getString("TEXTBODY")
     /* AWS Config End */
 
 //    StreamingExamples.setStreamingLogLevels()
 
-    val brokers = "b-2.kafka-cluster-karan.nxte3l.c20.kafka.us-east-1.amazonaws.com:9094,b-1.kafka-cluster-karan.nxte3l.c20.kafka.us-east-1.amazonaws.com:9094"
-    val topics = "logtopic"
+    val brokers = sparkConfig.getString("BROKERS")
+    val topics = sparkConfig.getString("TOPIC")
 
     // Create context with 2 second batch interval
     val sparkConf = new SparkConf().setAppName("KafkaSparkIntegration").setMaster("local[*]")
-    val ssc = new StreamingContext(sparkConf, Seconds(2))
+    val ssc = new StreamingContext(sparkConf, Seconds(10))
     ssc.sparkContext.setLogLevel("ERROR")
 
     // Create direct kafka stream with brokers and topics
@@ -61,8 +65,8 @@ object KafkaSparkIntegration {
       ConsumerConfig.GROUP_ID_CONFIG -> UUID.randomUUID().toString,
       ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer],
       ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer],
-      CommonClientConfigs.SECURITY_PROTOCOL_CONFIG -> "SSL",
-      "ssl.truststore.location" -> "/tmp/kafka.client.truststore.jks")
+      CommonClientConfigs.SECURITY_PROTOCOL_CONFIG -> sparkConfig.getString("SSL"),
+      sparkConfig.getString("SSL_TRUSSTORE") -> sparkConfig.getString("TRUSTSTORE_LOCATION"))
     val messages = KafkaUtils.createDirectStream[String, String](
       ssc,
       LocationStrategies.PreferConsistent,
@@ -74,9 +78,9 @@ object KafkaSparkIntegration {
     lines.foreachRDD(x => {
       if (x.count() > 0){
         val HTMLBODY: String = s"""<h1>WARNING/ERROR IN YOUR APPLICATION</h1
-                                 |<p>This email was sent with <a href="https://aws.amazon.com/sdk-for-java/">AWS SDK for Java</a>
-                                 |<p>You received a WARNING/ERROR Message</p>
-                                 |<p>${x.collect().mkString(" ")}</p>"""
+                                 <p>This email was sent with <a href="https://aws.amazon.com/sdk-for-java/">AWS SDK for Java</a>
+                                 <p>You received a WARNING/ERROR Message</p>
+                                 <p><b>${x.collect().mkString(" ")}</b></p>"""
         val client = SesClient.builder()
           .region(Region.US_EAST_1)
           .build()
