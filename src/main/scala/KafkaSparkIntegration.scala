@@ -40,8 +40,10 @@ import java.util.UUID;
  *    consumer-group topic1,topic2
  */
 object KafkaSparkIntegration {
+  val logger = CreateLogger(classOf[KafkaSparkIntegration])
   def main(args: Array[String]): Unit = {
     /* Load Configs from application.conf and Create Logger */
+    logger.info("Fetching all the Configurations...")
     val config = ConfigFactory.load()
     val logger = CreateLogger(classOf[KafkaSparkIntegration])
 
@@ -69,7 +71,7 @@ object KafkaSparkIntegration {
       ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer],
       ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer],
       CommonClientConfigs.SECURITY_PROTOCOL_CONFIG -> config.getString("spark.SSL"),
-      config.getString("spark.SSL_TRUSSTORE") -> config.getString("spark.TRUSTSTORE_LOCATION"))
+      config.getString("spark.SSL_TRUSTSTORE") -> config.getString("spark.TRUSTSTORE_LOCATION"))
     val messages = KafkaUtils.createDirectStream[String, String](
       ssc,
       LocationStrategies.PreferConsistent,
@@ -79,6 +81,7 @@ object KafkaSparkIntegration {
     val lines = messages.map(_.value)
 
     // Loop on all the lines received in the interval and send an EMAIL for each one of them
+    logger.info("Iterating through the RDD...")
     lines.foreachRDD(x => {
       if (x.count() > 0){
         val HTMLBODY: String = s"""<h1>WARNING/ERROR IN YOUR APPLICATION</h1
@@ -103,6 +106,8 @@ object KafkaSparkIntegration {
   }
   def send(client: SesClient, sender: String, recipient: String, subject: String, bodyText: String, bodyHTML: String): Unit ={
 
+
+    logger.info("Sending an Email now...")
     // Create a Session and a message of MIME TYPE
     val session: Session = Session.getDefaultInstance(new Properties())
     val message: MimeMessage = new MimeMessage(session)
@@ -110,8 +115,6 @@ object KafkaSparkIntegration {
     // Set Subject, Address, Sender and Recepient
     message.setSubject(subject,"UTF-8")
     val addressArray = InternetAddress.parse(recipient).asInstanceOf[Array[Address]]
-    //val addressArray = buildInternetAddressArray(recipient).asInstanceOf[Array[Address]]
-//    val toAddress:Address = new InternetAddress(recipient).asInstanceOf[Address]
     message.setFrom(new InternetAddress(sender))
     message.setRecipients(Message.RecipientType.TO,addressArray)
 
@@ -139,7 +142,7 @@ object KafkaSparkIntegration {
 
     try {
       // Attempt to send an email
-      println("Attempting to send an email through Amazon SES using the AWS SDK")
+      logger.info("Attempting to send an email through Amazon SES using the AWS SDK")
       val outputStream: ByteArrayOutputStream = new ByteArrayOutputStream()
       message.writeTo(outputStream)
       val buf: ByteBuffer = ByteBuffer.wrap(outputStream.toByteArray)
@@ -162,8 +165,4 @@ object KafkaSparkIntegration {
       }
     }
   }
-
-//  def buildInternetAddressArray(address: String): Array[InternetAddress] = {
-//    InternetAddress.parse(address)
-//  }
 }
