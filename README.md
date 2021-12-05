@@ -30,19 +30,19 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 - Use the "Quickly create a cluster" option choosing a kafka.t3.small EC2 broker instance having a EBS storage of 2 GB and launch the cluster
 - Next create a Linux t2.large EC2 instance and launch the instance
 - SSH into the created EC2 instance and execute the following commands :
-- Install Java: ### `sudo yum install java-1.8.0`
-- Get Kafka: ### `wget  https://archive.apache.org/dist/kafka/2.2.1/kafka_2.12-2.2.1.tgz`
-- Extract Kafka: ### `tar -xzf kafka_2.12-2.2.1.tgz`
-- Get Cluster ARN: ### `aws kafka describe-cluster --cluster-arn "ClusterArn" --region region`
-- Create Topic: ### `bin/kafka-topics.sh --create --zookeeper "ZookeeperConnectString" --replication-factor 2 --partitions 1 --topic topic`
+- Install Java: `sudo yum install java-1.8.0`
+- Get Kafka: `wget  https://archive.apache.org/dist/kafka/2.2.1/kafka_2.12-2.2.1.tgz`
+- Extract Kafka: `tar -xzf kafka_2.12-2.2.1.tgz`
+- Get Cluster ARN: `aws kafka describe-cluster --cluster-arn "ClusterArn" --region region`
+- Create Topic: `bin/kafka-topics.sh --create --zookeeper "ZookeeperConnectString" --replication-factor 2 --partitions 1 --topic topic`
 2. Now we have to produce and consume data from the above crested kafka stream:
 - Get the name of the Java JVM from the java runtime and use the Java trust store command which is a copy command to fetch the trust door from Java: ### `cp/usr/lib/jvm/"Java JVM name"/jre/lib/security/cacerts /tmp/kafka.client.truststore.jks`
 3. Switch directories to kafka's bin folder and create a client properties file that contains a security protocol on the trust store location.
-- client.properties: ### `security.protocol=SSL ssl.truststore.location=/tmp/kafka.client.truststore.jks`
+- client.properties: `security.protocol=SSL ssl.truststore.location=/tmp/kafka.client.truststore.jks`
 4. To start creating messages we need to get the bootstrap broker string TSL 
-- Get Broker's TLS string: ### `aws kafka get-bootstrap-brokers --cluster-arn ClusterArn --region`
-5. Command to start the producer: ### `./kafka-console-producer.sh --broker-list "BootstrapBrokerStringTls" --producer.config client.properties --topic Topics`
-6. Start another EC2 session for the consumer and use the following command to start the consumer: ### `./kafka-console-consumer.sh --bootstrap-server "BootstrapBrokerStringTls" --consumer.config client.properties --topic "Topics" --from-beginning!`
+- Get Broker's TLS string: `aws kafka get-bootstrap-brokers --cluster-arn ClusterArn --region`
+5. Command to start the producer: `./kafka-console-producer.sh --broker-list "BootstrapBrokerStringTls" --producer.config client.properties --topic Topics`
+6. Start another EC2 session for the consumer and use the following command to start the consumer: `./kafka-console-consumer.sh --bootstrap-server "BootstrapBrokerStringTls" --consumer.config client.properties --topic "Topics" --from-beginning!`
 
 
 ## Setting up Apache Spark
