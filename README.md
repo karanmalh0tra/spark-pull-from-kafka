@@ -45,6 +45,7 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 - Get Broker's TLS string: `aws kafka get-bootstrap-brokers --cluster-arn ClusterArn --region`
 5. Command to start the producer: `./kafka-console-producer.sh --broker-list "BootstrapBrokerStringTls" --producer.config client.properties --topic Topics`
 6. Start another EC2 session for the consumer and use the following command to start the consumer: `./kafka-console-consumer.sh --bootstrap-server "BootstrapBrokerStringTls" --consumer.config client.properties --topic "Topics" --from-beginning!`
+7. Lines entered in the Producer would be read by the consumer.
 
 
 ## Setting up Apache Spark
