@@ -74,6 +74,9 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 1. Tests if URL is https or not.
 
 ## Output
+<p align="center">
+  <img src="https://github.com/karanmalh0tra/spark-pull-from-kafka/blob/main/Images/output.png" alt="output image"/>
+</p>![image](https://user-images.githubusercontent.com/88978691/144767666-5e5f0629-49f6-4dfc-93b3-b953784e1e06.png)
 
 ## Other Repos
 
