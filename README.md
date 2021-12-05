@@ -71,7 +71,11 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 9. Execute the Spark Program by typing `sbt "runMain KafkaSparkIntegration"` in the root directory of this project.
 
 ## Test Cases
-1. Tests if URL is https or not.
+1. `testCheckConfig` tests if Configs exists or not.
+2. `testBrokerTLS` confirms whether the broker is empty.
+3. `testFROMEmailIDInstance` confirms the email address is of type InternetAddress.
+4. `testRecipientEmailAddresses` confirms that the list of email address set as recipients is of type Array[InternetAddress].
+5. `testJKSFileExists` sees if the JKS file `kafka.client.truststore.jks` is inside the directory as mentioned in the instructions above as well.
 
 ## Output
 <p align="center">
