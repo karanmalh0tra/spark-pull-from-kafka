@@ -42,19 +42,18 @@ import java.util.UUID;
 object KafkaSparkIntegration {
   def main(args: Array[String]): Unit = {
     /* Load Configs from application.conf and Create Logger */
-    val sparkConfig = ConfigFactory.load("spark")
-    val awsConfig = ConfigFactory.load("aws")
+    val config = ConfigFactory.load()
     val logger = CreateLogger(classOf[KafkaSparkIntegration])
 
     /* LOAD AWS Configs */
-    val FROM: String = awsConfig.getString("FROM")
-    val TO: String = awsConfig.getString("TO")
-    val SUBJECT: String = awsConfig.getString("SUBJECT")
-    val TEXTBODY: String = awsConfig.getString("TEXTBODY")
+    val FROM: String = config.getString("aws.FROM")
+    val TO: String = config.getString("aws.TO")
+    val SUBJECT: String = config.getString("aws.SUBJECT")
+    val TEXTBODY: String = config.getString("aws.TEXTBODY")
 
     /* LOAD Spark Configs */
-    val brokers = sparkConfig.getString("BROKERS")
-    val topics = sparkConfig.getString("TOPIC")
+    val brokers = config.getString("spark.BROKERS")
+    val topics = config.getString("spark.TOPIC")
 
     // Create context with 2 second batch interval
     val sparkConf = new SparkConf().setAppName("KafkaSparkIntegration").setMaster("local[*]")
@@ -69,8 +68,8 @@ object KafkaSparkIntegration {
       ConsumerConfig.GROUP_ID_CONFIG -> UUID.randomUUID().toString,
       ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer],
       ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer],
-      CommonClientConfigs.SECURITY_PROTOCOL_CONFIG -> sparkConfig.getString("SSL"),
-      sparkConfig.getString("SSL_TRUSSTORE") -> sparkConfig.getString("TRUSTSTORE_LOCATION"))
+      CommonClientConfigs.SECURITY_PROTOCOL_CONFIG -> config.getString("spark.SSL"),
+      config.getString("spark.SSL_TRUSSTORE") -> config.getString("spark.TRUSTSTORE_LOCATION"))
     val messages = KafkaUtils.createDirectStream[String, String](
       ssc,
       LocationStrategies.PreferConsistent,
@@ -110,9 +109,11 @@ object KafkaSparkIntegration {
 
     // Set Subject, Address, Sender and Recepient
     message.setSubject(subject,"UTF-8")
-    val toAddress:Address = new InternetAddress(recipient).asInstanceOf[Address]
+    val addressArray = InternetAddress.parse(recipient).asInstanceOf[Array[Address]]
+    //val addressArray = buildInternetAddressArray(recipient).asInstanceOf[Array[Address]]
+//    val toAddress:Address = new InternetAddress(recipient).asInstanceOf[Address]
     message.setFrom(new InternetAddress(sender))
-    message.setRecipient(Message.RecipientType.TO,toAddress)
+    message.setRecipients(Message.RecipientType.TO,addressArray)
 
     // As an alternative to the HTML Body Message in case of failure
     val msgBody: MimeMultipart = new MimeMultipart("alternative")
@@ -161,4 +162,8 @@ object KafkaSparkIntegration {
       }
     }
   }
+
+//  def buildInternetAddressArray(address: String): Array[InternetAddress] = {
+//    InternetAddress.parse(address)
+//  }
 }
