@@ -25,7 +25,7 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 ## Project Overview
 + In this project a streaming data pipeline was created by designing and implementing an actor-model service using Akka.
 + This model  ingests logfile generated data in real time and delivers it via an event-based service called Kafka to Spark for further processing. 
-+ An aggregation of the total number of ERROR and WARN messages was computed and the stakeholders were notified via email.
++ An aggregation of the total number of ERROR and WARN messages was computed and the stakeholders were notified via email sent using AWS SES.
 
 ## Setting up Kafka
 1. To set up kafka in the cloud we will be making use of Amazon's Managed Streaming for Apache Kafka. Amazon MSK is a fully managed service that enables one to build and run applications that use Apache Kafka to process streaming data which in our case are the log messages being passed from the Akka actor system. The following steps are to be followed to set up kafka :-
@@ -34,7 +34,7 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 - SSH into the created EC2 instance and execute the following commands :
 - Install Java: `sudo yum install java-1.8.0`
 - Get Kafka: `wget  https://archive.apache.org/dist/kafka/2.2.1/kafka_2.12-2.2.1.tgz`
-- Extract Kafka: `tar -xzf kafka_2.12-2.2.1.tgz`
+- Extract Kafka: `tar -xzvf kafka_2.12-2.2.1.tgz`
 - Get Cluster ARN: `aws kafka describe-cluster --cluster-arn "ClusterArn" --region region`
 - Create Topic: `bin/kafka-topics.sh --create --zookeeper "ZookeeperConnectString" --replication-factor 2 --partitions 1 --topic topic`
 2. Now we have to produce and consume data from the above crested kafka stream:
@@ -55,7 +55,7 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 	`"org.apache.spark"%%"spark-streaming-kafka-0-10"%"3.0.3"`
 2. The first thing a Spark program must do is to create a SparkContext object, which tells Spark how to access a cluster. To create a SparkContext one needs to build a SparkConf object that contains information about the application
 3. Then a Kafka consumer to fetch error and warn log messages via the spark streams was implemented 
-4. Finally every line received from the kafka stream was iterated over and an email was sent for the same.
+4. Finally every line received from consumer via the spark stream was iterated over and an email was sent for the same.
 
 ### Steps to Run the Spark-Pull-From-Kafka Application
 1. Install Scala
