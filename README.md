@@ -46,7 +46,14 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 
 
 ## Setting up Apache Spark
-- Write here
+1. The main abstraction Spark provides is a resilient distributed dataset (RDD), which is a collection of elements partitioned across the nodes of the cluster that can be operated on in parallel
+	- The following Spark dependencies were added in the `build.sbt` file:
+	`"org.apache.spark"%%"spark-core"%"3.0.3"`
+	`"org.apache.spark"%%"spark-streaming"%"3.0.3"`
+	`"org.apache.spark"%%"spark-streaming-kafka-0-10"%"3.0.3"`
+2. The first thing a Spark program must do is to create a SparkContext object, which tells Spark how to access a cluster. To create a SparkContext one needs to build a SparkConf object that contains information about the application
+3. Then a Kafka consumer to fetch error and warn log messages via the spark streams implemented 
+4. Finally every line received from the kafka stream was iterated over and an email was sent for the same
 
 ### Steps to Run the Spark-Pull-From-Kafka Application Manually
 - Write here
