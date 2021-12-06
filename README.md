@@ -103,4 +103,4 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 + https://github.com/shaide32/LogGenerator
 + https://github.com/shaide32/s3-file-watcher
 
-Video Link:
+Video Link: https://www.youtube.com/watch?v=Itve0D0rjdw
