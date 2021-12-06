@@ -84,9 +84,7 @@ object KafkaSparkIntegration {
     logger.info("Iterating through the RDD...")
     lines.foreachRDD(x => {
       if (x.count() > 0){
-        val HTMLBODY: String = s"""<h1>WARNING/ERROR IN YOUR APPLICATION</h1
-                                 <p>You received a WARNING/ERROR LOG in your application</p>
-                                 <p><b>${x.collect().mkString(" ")}</b></p>"""
+        val HTMLBODY: String = config.getString("aws.HTMLBODY")+"<p><b>"+x.collect().mkString(" ")+"</b></p>"
         val client = SesClient.builder()
           .region(Region.US_EAST_1)
           .build()
