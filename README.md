@@ -2,9 +2,9 @@
 Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Email Service.
 ---
 ## Group Members
-1. Karan Malhotra
-2. Shahrukh Haider
-3. Shashwath Jawaharlal Sathyanarayan
+1. Karan Malhotra (kmalho4@uic.edu)
+2. Shahrukh Haider (shaide32@uic.edu)
+3. Shashwath Jawaharlal Sathyanarayan (sjawah2@uic.edu)
 ---
 
 ### Installations
