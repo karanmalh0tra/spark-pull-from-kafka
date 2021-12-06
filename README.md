@@ -27,6 +27,21 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 + This model  ingests logfile generated data in real time and delivers it via an event-based service called Kafka to Spark for further processing. 
 + An aggregation of the total number of ERROR and WARN messages was computed and the stakeholders were notified via email sent using AWS SES.
 
+## Project Description
+- The Log File Generator is forked repository from Dr. Mark's LogFileGenerator.
+- The updated repository creates a line of log after an interval specified in the configuration and pushes that into the S3 Bucket.
+- Through the S3 File Watcher repository, we monitor changes in the S3 bucket and generate a corresponding SQS message.
+- We listen for changes by long polling the SQS queue. For each message we read the last line of the log file in the s3 bucket. All this is done by the first actor.
+- After getting the latest log entry it is sent to the second actor. The second actor filters out the warning and error logs and push them into the kafka stream.
+- This is done via the Kafka Producer.
+- The Spark Application written in Scala and present in this repo, has a consumer which fetches each log from Kafka and utilises the AWS SDK V2 Package to send an email notifying the stakeholders about the presence of ERROR/WARNING Logs.
+
+## Setting up Log Generator
+- Refer to the documentation present in the [Log File Generator Repository](https://github.com/shaide32/LogGenerator)
+
+## Settin up S3 File Watcher
+- Refer to the documentation present in the [S3 File Watcher Repository](https://github.com/shaide32/s3-file-watcher)
+
 ## Setting up Kafka
 1. To set up kafka in the cloud we will be making use of Amazon's Managed Streaming for Apache Kafka. Amazon MSK is a fully managed service that enables one to build and run applications that use Apache Kafka to process streaming data which in our case are the log messages being passed from the Akka actor system. The following steps are to be followed to set up kafka :-
 - Use the "Quickly create a cluster" option choosing a kafka.t3.small EC2 broker instance having a EBS storage of 2 GB and launch the cluster
@@ -69,6 +84,7 @@ Consuming Warning/Error Logs from Kafka and notifying users via Amazon Simple Em
 5. Install Git
  - `sudo yum install git`
 7. Clone this repo
+8. Type `aws configure` and follow the steps to configure `Access Key ID` and `Secret Access Key`.
 9. Execute the Spark Program by typing `sbt "runMain KafkaSparkIntegration"` in the root directory of this project.
 
 ## Test Cases
